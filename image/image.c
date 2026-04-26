@@ -14,8 +14,8 @@ static int32_t iLoadImagePNG(Image* image, const uint8_t* data, uint64_t size) {
   
     image->width = png.ihdr.imageWidth;
     image->height = png.ihdr.imageHeight;
-    image->bytesPerPixel = BytesPerColorTypePNG(png.ihdr.colorType);
-    imageSizeBytes = image->width * image->height * image->bytesPerPixel;
+    uint32_t bpp = BytesPerColorTypePNG(png.ihdr.colorType);
+    imageSizeBytes = image->width * image->height * bpp;
     if (!imageSizeBytes) {
         FreePNG(&png);
         return -10;
@@ -24,7 +24,7 @@ static int32_t iLoadImagePNG(Image* image, const uint8_t* data, uint64_t size) {
     if (!image->data) {
         return -2;
     }
-    if ((error = LoadPNG(&png, image->data, imageSizeBytes)) < 0) {
+    if ((error = ReadPNG(&png, image->data, imageSizeBytes)) < 0) {
         free(image->data);
         FreePNG(&png);
         return error;
@@ -33,7 +33,18 @@ static int32_t iLoadImagePNG(Image* image, const uint8_t* data, uint64_t size) {
     return 1;
 }
 
-int32_t iLoadImage(Image* image, const char* fileName)
+static int32_t iWriteImagePNG(Image* image, const char* fileName) {
+    PNGWriter png = { 0 };
+    png.imageWidth = image->width;
+    png.imageHeight = image->height;
+    png.imageType = (image->imageType == IMAGE_PNG_RGB) ? PNG_RGB : 
+                    (image->imageType == IMAGE_PNG_RGBA) ? PNG_RGBA : 
+                    (image->imageType == IMAGE_PNG_GRAYSCALE) ? PNG_GRAYSCALE : 0;
+    png.data = image->data;
+    return WritePNG(&png, fileName);
+}
+
+int32_t iReadImage(Image* image, const char* fileName)
 {
     DEBUG(image);
     DEBUG(fileName);
@@ -73,12 +84,37 @@ int32_t iLoadImage(Image* image, const char* fileName)
             return error;
         }
     }
-    //else if (0) {} 
 
     free(data);
     fclose(file);
     return 1;
 }
+
+int32_t iWriteImage(Image* image, const char* fileName)
+{
+    DEBUG(image);
+    DEBUG(fileName);
+    DEBUG(image->imageType == IMAGE_PNG_RGB || image->imageType == IMAGE_PNG_RGBA || image->imageType == IMAGE_PNG_GRAYSCALE);
+
+    int32_t error = 0;
+
+    switch (image->imageType) {
+    case IMAGE_PNG_RGB:
+    case IMAGE_PNG_GRAYSCALE:
+    case IMAGE_PNG_RGBA:
+    {
+        if ((error = iWriteImagePNG(image, fileName) < 0)) {
+            return error;
+        }
+    }
+    default:
+    {
+        return -4;
+    }
+    }
+    return 1;
+}
+
 #ifdef _WIN32
 #pragma optimize( "", off )
 void iFreeImage(Image* image)
@@ -87,7 +123,6 @@ void iFreeImage(Image* image)
     if (!image->data) return;
     image->width = 0;
     image->height = 0;
-    image->bytesPerPixel = 0;
     free(image->data);
 }
 #pragma optimize( "", on )

@@ -10,10 +10,10 @@ typedef struct ZlibHeader {
 	uint8_t flevel : 2;
 } ZlibHeader;
 
-typedef struct DeflateBlock {
+typedef struct DeflateBlockHeader {
 	uint8_t BFINAL : 1;
 	uint8_t BTYPE : 2;
-} DeflateBlock;
+} DeflateBlockHeader;
 
 typedef struct {
 	ZlibHeader header;
@@ -29,10 +29,10 @@ typedef struct ZlibWriter {
 } ZlibWriter;
 
 
-int lzInflateInit(ZlibReader* z, const uint8_t* data, uint64_t size);
-int lzInflate(ZlibReader* z, uint8_t* output, uint64_t size);
+int32_t lzInflateInit(ZlibReader* z, const uint8_t* data, uint64_t size);
+int32_t lzInflate(ZlibReader* z, uint8_t* output, uint64_t size);
 
-int lzDeflateInit(ZlibWriter* z, const uint8_t* data, uint64_t size);
-int lzDeflate(ZlibWriter* z, uint8_t* output, uint64_t size);
+int32_t lzDeflateInit(ZlibWriter* z, const uint8_t* data, uint64_t size);
+int32_t lzDeflate(ZlibWriter* z, uint8_t* output, uint64_t *size);
 
 #endif // _ZLIB_H

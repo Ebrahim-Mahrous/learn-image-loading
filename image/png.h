@@ -16,6 +16,13 @@ typedef struct RGBA {
 	uint8_t a;
 } RGBA;
 
+enum PNG_IMAGE_TYPE {
+	PNG_GRAYSCALE = 0,
+	PNG_RGB = 2,
+	PNG_PLTE = 3,
+	PNG_RGBA = 6
+};
+
 typedef struct IHDR {
 	uint32_t imageWidth;
 	uint32_t imageHeight;
@@ -34,7 +41,7 @@ typedef struct PLTE {
 	};
 } PLTE;
 
-typedef struct PngChunk {
+typedef struct PNGChunk {
 	uint32_t length;
 	union {
 		uint32_t u32type;
@@ -42,7 +49,7 @@ typedef struct PngChunk {
 	};
 	const uint8_t* data;
 	uint32_t crc;
-} PngChunk;
+} PNGChunk;
 
 typedef struct PNG
 {
@@ -56,13 +63,24 @@ typedef struct PNG
 
 	uint64_t chunksCapacity;
 	uint64_t chunksSize;
-	PngChunk* pChunks;
+	PNGChunk* pChunks;
 } PNG;
+
+typedef struct PNGWriter {
+	uint32_t imageWidth;
+	uint32_t imageHeight;
+	uint32_t imageType;
+	uint8_t* data;
+} PNGWriter;
 
 int32_t IsPNG(const uint8_t* data, uint64_t size);
 int32_t InitPNG(PNG* png, const uint8_t *data, uint64_t inSize);
-int32_t LoadPNG(PNG* png, uint8_t* ouput, uint64_t outSize);
+int32_t ReadPNG(PNG* png, uint8_t* ouput, uint64_t outSize);
+int32_t WritePNG(const PNGWriter* png, const char* fileName);
+// -- code from libpng https://www.libpng.org/pub/png/spec/1.2/PNG-CRCAppendix.html
+static unsigned long update_crc(unsigned long crc, unsigned char* buf, int len);
+// --
 inline uint32_t BytesPerColorTypePNG(uint32_t type);
 void FreePNG(PNG* png);
 
-#endif
+#endif // _PNG_H
