@@ -15,7 +15,7 @@ static int32_t iLoadImagePNG(Image* image, const uint8_t* data, uint64_t size) {
     image->width = png.ihdr.imageWidth;
     image->height = png.ihdr.imageHeight;
     uint32_t bpp = BytesPerColorTypePNG(png.ihdr.colorType);
-    imageSizeBytes = image->width * image->height * bpp;
+    imageSizeBytes = (uint64_t)image->width * image->height * bpp;
     if (!imageSizeBytes) {
         FreePNG(&png);
         return -10;

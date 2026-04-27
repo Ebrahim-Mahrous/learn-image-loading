@@ -73,14 +73,24 @@ typedef struct PNGWriter {
 	uint8_t* data;
 } PNGWriter;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int32_t IsPNG(const uint8_t* data, uint64_t size);
 int32_t InitPNG(PNG* png, const uint8_t *data, uint64_t inSize);
 int32_t ReadPNG(PNG* png, uint8_t* ouput, uint64_t outSize);
 int32_t WritePNG(const PNGWriter* png, const char* fileName);
+
 // -- code from libpng https://www.libpng.org/pub/png/spec/1.2/PNG-CRCAppendix.html
 static unsigned long update_crc(unsigned long crc, unsigned char* buf, int len);
 // --
+
 inline uint32_t BytesPerColorTypePNG(uint32_t type);
 void FreePNG(PNG* png);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // _PNG_H

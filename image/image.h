@@ -15,9 +15,16 @@ enum ImageType {
 	IMAGE_PNG_GRAYSCALE,
 };
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int32_t iReadImage(Image* image, const char* fileName);
 void iFreeImage(Image* image);
-
 int32_t iWriteImage(Image* image, const char* fileName);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // !_IMAGE_H
